@@ -1,0 +1,248 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "title": "Tracked Symbols",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "MarketDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(DISTINCT symbol) AS symbols FROM clean_market_data;",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "blue" },
+          "thresholds": { "steps": [{ "color": "blue", "value": null }] }
+        }
+      }
+    },
+    {
+      "title": "Total Data Points",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "MarketDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS total FROM clean_market_data;",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "green" },
+          "thresholds": { "steps": [{ "color": "green", "value": null }] }
+        }
+      }
+    },
+    {
+      "title": "Anomalies Detected",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "MarketDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS anomalies FROM market_anomalies WHERE symbol != 'SYSTEM';",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "orange" },
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 1 },
+              { "color": "red", "value": 10 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Latest Update",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "MarketDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT MAX(window_start) AS latest FROM clean_market_data;",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "purple" },
+          "unit": "dateTimeAsIso"
+        }
+      }
+    },
+    {
+      "title": "Bitcoin Price",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "MarketDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT close_price FROM clean_market_data WHERE symbol = 'bitcoin' ORDER BY window_start DESC LIMIT 1;",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": { "mode": "fixed", "fixedColor": "yellow" },
+          "thresholds": { "steps": [{ "color": "yellow", "value": null }] }
+        }
+      }
+    },
+    {
+      "title": "Ethereum Price",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "MarketDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT close_price FROM clean_market_data WHERE symbol = 'ethereum' ORDER BY window_start DESC LIMIT 1;",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": { "mode": "fixed", "fixedColor": "semi-dark-blue" },
+          "thresholds": { "steps": [{ "color": "semi-dark-blue", "value": null }] }
+        }
+      }
+    },
+    {
+      "title": "Live Crypto Prices",
+      "type": "timeseries",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 4 },
+      "datasource": { "type": "postgres", "uid": "MarketDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT window_start AS time, symbol, close_price AS price FROM clean_market_data WHERE $__timeFilter(window_start) ORDER BY window_start;",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "pointSize": 4,
+            "spanNulls": true,
+            "showPoints": "auto"
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "min", "max"] },
+        "tooltip": { "mode": "multi" }
+      }
+    },
+    {
+      "title": "Trading Volume by Symbol",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "datasource": { "type": "postgres", "uid": "MarketDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT window_start AS time, symbol, volume FROM clean_market_data WHERE $__timeFilter(window_start) ORDER BY window_start;",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "bars", "fillOpacity": 60, "stacking": { "mode": "none" } },
+          "unit": "short"
+        }
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      }
+    },
+    {
+      "title": "Price Return % Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+      "datasource": { "type": "postgres", "uid": "MarketDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT window_start AS time, symbol, price_return_pct FROM clean_market_data WHERE $__timeFilter(window_start) ORDER BY window_start;",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "lineWidth": 1, "fillOpacity": 15 },
+          "unit": "percent",
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 2 },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Current Prices & Statistics",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
+      "datasource": { "type": "postgres", "uid": "MarketDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT DISTINCT ON (symbol) symbol, asset_type, ROUND(close_price::numeric, 2) AS close_price, ROUND(high_price::numeric, 2) AS high, ROUND(low_price::numeric, 2) AS low, ROUND(volume::numeric, 0) AS volume, ROUND(price_return_pct::numeric, 4) AS return_pct, ROUND(rolling_volatility::numeric, 6) AS volatility, window_start AS updated_at FROM clean_market_data ORDER BY symbol, window_start DESC;",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "OHLC Summary (Latest Window)",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
+      "datasource": { "type": "postgres", "uid": "MarketDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT symbol, ROUND(open_price::numeric, 2) AS open, ROUND(high_price::numeric, 2) AS high, ROUND(low_price::numeric, 2) AS low, ROUND(close_price::numeric, 2) AS close, record_count AS ticks, window_start, window_end FROM clean_market_data WHERE window_start = (SELECT MAX(window_start) FROM clean_market_data) ORDER BY symbol;",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["market", "overview", "crypto"],
+  "templating": { "list": [] },
+  "time": { "from": "now-3h", "to": "now" },
+  "timepicker": {},
+  "timezone": "utc",
+  "title": "Market Overview",
+  "uid": "market-overview",
+  "version": 1
+}

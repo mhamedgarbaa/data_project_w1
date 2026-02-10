@@ -1,0 +1,124 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 2,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "Rolling Volatility Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "MarketDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT window_start AS time, symbol, rolling_volatility FROM clean_market_data WHERE $__timeFilter(window_start) ORDER BY window_start;",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "pointSize": 3,
+            "spanNulls": true
+          },
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "title": "Price Return % Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 10 },
+      "datasource": { "type": "postgres", "uid": "MarketDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT window_start AS time, symbol, price_return_pct FROM clean_market_data WHERE $__timeFilter(window_start) ORDER BY window_start;",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 20,
+            "gradientMode": "scheme",
+            "thresholdsStyle": { "mode": "dashed" }
+          },
+          "unit": "percent",
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 2 },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Volume Delta Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "datasource": { "type": "postgres", "uid": "MarketDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT window_start AS time, symbol, volume_delta FROM clean_market_data WHERE $__timeFilter(window_start) ORDER BY window_start;",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "bars", "fillOpacity": 50 },
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "title": "Asset Volatility Comparison (Latest)",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "datasource": { "type": "postgres", "uid": "MarketDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT DISTINCT ON (symbol) symbol, rolling_volatility FROM clean_market_data ORDER BY symbol, window_start DESC;",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Volatility vs Price Return (Scatter)",
+      "type": "xychart",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 28 },
+      "datasource": { "type": "postgres", "uid": "MarketDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT rolling_volatility, price_return_pct, symbol FROM clean_market_data WHERE $__timeFilter(window_start) AND rolling_volatility IS NOT NULL AND price_return_pct IS NOT NULL LIMIT 500;",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["market", "volatility", "trends"],
+  "templating": { "list": [] },
+  "time": { "from": "now-3h", "to": "now" },
+  "timepicker": {},
+  "timezone": "utc",
+  "title": "Volatility Trends",
+  "uid": "volatility-trends",
+  "version": 1
+}

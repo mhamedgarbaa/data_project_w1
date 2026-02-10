@@ -1,0 +1,176 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "title": "\ud83d\udcca Recent Market Data Activity",
+      "type": "table",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "MarketDB"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT symbol, asset_type, ROUND(close_price::numeric, 2) AS close_price, ROUND(volume::numeric, 0) AS volume, ROUND(price_return_pct::numeric, 4) AS return_pct, ROUND(rolling_volatility::numeric, 6) AS volatility, window_start, window_end FROM clean_market_data WHERE $__timeFilter(window_start) ORDER BY window_start DESC LIMIT 50;",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "\ud83d\udd34 Active Anomaly Alerts",
+      "type": "table",
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "MarketDB"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT detected_at, symbol, asset_type, anomaly_type, severity, ROUND(z_score::numeric, 2) AS z_score, ROUND(current_value::numeric, 4) AS current_value, ROUND(mean_value::numeric, 4) AS mean_value, ROUND(price::numeric, 2) AS price, ROUND(volume::numeric, 0) AS volume FROM market_anomalies WHERE $__timeFilter(detected_at) AND symbol != 'SYSTEM' ORDER BY detected_at DESC LIMIT 100;",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "severity"
+            },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "high": {
+                        "color": "red",
+                        "text": "HIGH"
+                      }
+                    }
+                  },
+                  {
+                    "type": "value",
+                    "options": {
+                      "medium": {
+                        "color": "yellow",
+                        "text": "MEDIUM"
+                      }
+                    }
+                  },
+                  {
+                    "type": "value",
+                    "options": {
+                      "low": {
+                        "color": "green",
+                        "text": "LOW"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "title": "Anomaly Z-Score Distribution",
+      "type": "histogram",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 18
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "MarketDB"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT z_score FROM market_anomalies WHERE $__timeFilter(detected_at) AND symbol != 'SYSTEM';",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Anomalies per Hour",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 18
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "MarketDB"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT date_trunc('hour', detected_at) AS time, severity, COUNT(*) AS count FROM market_anomalies WHERE $__timeFilter(detected_at) AND symbol != 'SYSTEM' GROUP BY 1, 2 ORDER BY 1;",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 70,
+            "stacking": {
+              "mode": "normal"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "market",
+    "anomalies",
+    "alerts"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "utc",
+  "title": "Anomaly Alerts",
+  "uid": "anomaly-alerts",
+  "version": 1
+}

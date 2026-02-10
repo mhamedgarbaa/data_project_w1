@@ -1,0 +1,15 @@
+# =============================================================================
+# Python dependencies for Market Anomaly Detection Platform
+# =============================================================================
+
+# Kafka producer
+kafka-python==2.0.2
+
+# HTTP client for API calls
+requests==2.31.0
+
+# PySpark (used by Spark streaming job – also available in Spark container)
+pyspark==3.5.0
+
+# PostgreSQL driver (Python-side, for any direct DB access if needed)
+psycopg2-binary==2.9.9

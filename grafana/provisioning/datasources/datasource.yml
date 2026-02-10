@@ -1,0 +1,24 @@
+# =============================================================================
+# Grafana datasource auto-provisioning – PostgreSQL
+# =============================================================================
+apiVersion: 1
+
+datasources:
+  - name: MarketDB
+    uid: MarketDB
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: marketdb
+    user: marketuser
+    isDefault: true
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 10
+      maxIdleConns: 5
+      connMaxLifetime: 14400
+      postgresVersion: 1500    # PostgreSQL 15
+      timescaledb: false
+    secureJsonData:
+      password: marketpass
+    editable: true

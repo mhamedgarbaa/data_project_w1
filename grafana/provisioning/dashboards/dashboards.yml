@@ -1,0 +1,17 @@
+# =============================================================================
+# Grafana dashboard provider – auto-load dashboards from JSON files
+# =============================================================================
+apiVersion: 1
+
+providers:
+  - name: Market Anomaly Dashboards
+    orgId: 1
+    folder: "Market Anomaly Platform"
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false
